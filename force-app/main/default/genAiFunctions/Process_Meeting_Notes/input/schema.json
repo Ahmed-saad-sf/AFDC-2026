@@ -1,0 +1,35 @@
+{
+  "required" : [ "MeetingTitle", "conversationText" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "MeetingTitle" : {
+      "title" : "MeetingTitle",
+      "description" : "Provide a title or subject for the meeting",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "conversationText" : {
+      "title" : "conversationText",
+      "description" : "Pass the complete conversation transcript from the meeting or discussion",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "participantId" : {
+      "title" : "participantId",
+      "description" : "ID of the contact or user who participated in the meeting",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "rawNotes" : {
+      "title" : "rawNotes",
+      "description" : "Raw Meeting Notes",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

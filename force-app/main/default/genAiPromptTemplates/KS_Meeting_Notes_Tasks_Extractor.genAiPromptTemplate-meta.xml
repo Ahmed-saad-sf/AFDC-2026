@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <developerName>KS_Meeting_Notes_Tasks_Extractor</developerName>
+    <masterLabel>KS Meeting Notes Tasks Extractor</masterLabel>
+    <templateVersions>
+        <content>Your role is to create a list of Tasks based on the meeting notes you receive as an input. Please ensure that the tasks are stored in a JSON with 2 columns: Subject, Comments
+
+Use the following as an input to generate the list of tasks: {!$Input:meetingNotes}
+
+</content>
+        <inputs>
+            <apiName>meetingNotes</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>meetingNotes</masterLabel>
+            <referenceName>Input:meetingNotes</referenceName>
+            <required>true</required>
+        </inputs>
+        <primaryModel>sfdc_ai__DefaultOpenAIGPT4OmniMini</primaryModel>
+        <status>Published</status>
+    </templateVersions>
+    <templateVersions>
+        <content>Your role is to create a list of Tasks based on the meeting notes you receive as an input. Please ensure that the tasks are stored in a JSON with 1 column: Subject
+
+Use the following as an input to generate the list of tasks: {!$Input:meetingNotes}
+
+</content>
+        <inputs>
+            <apiName>meetingNotes</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>meetingNotes</masterLabel>
+            <referenceName>Input:meetingNotes</referenceName>
+            <required>true</required>
+        </inputs>
+        <primaryModel>sfdc_ai__DefaultOpenAIGPT4OmniMini</primaryModel>
+        <status>Draft</status>
+    </templateVersions>
+    <type>einstein_gpt__flex</type>
+    <visibility>Global</visibility>
+</GenAiPromptTemplate>

@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Analyzes raw meeting conversation data and extracts structured meeting notes including topics, action items, and key decisions</description>
+    <developerName>Meeting_Notes_Analyzer</developerName>
+    <masterLabel>Meeting Notes Analyzer</masterLabel>
+    <templateVersions>
+        <content>You are an expert meeting notes assistant. Analyze the following meeting conversation and extract structured information.
+
+Meeting Conversation:
+{!$Input:Meeting_Conversation}
+
+Please analyze this conversation and provide a structured summary with the following format:
+
+MEETING SUMMARY:
+[Provide a 2-3 sentence executive summary of the meeting]
+
+KEY TOPICS DISCUSSED:
+- [Topic 1]
+- [Topic 2]
+- [Continue as needed]
+
+ACTION ITEMS:
+- [Action item with owner if mentioned]
+- [Continue as needed]
+
+DECISIONS MADE:
+- [Decision 1]
+- [Continue as needed]
+
+NEXT STEPS:
+- [Next step 1]
+- [Continue as needed]
+
+Format your response as valid JSON with the following structure:
+{
+ &quot;summary&quot;: &quot;executive summary text&quot;,
+ &quot;topics&quot;: [&quot;topic1&quot;, &quot;topic2&quot;],
+ &quot;actionItems&quot;: [&quot;action1&quot;, &quot;action2&quot;],
+ &quot;decisions&quot;: [&quot;decision1&quot;, &quot;decision2&quot;],
+ &quot;nextSteps&quot;: [&quot;step1&quot;, &quot;step2&quot;]
+}
+
+</content>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__enUsLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__frFrLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arEgLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arLbLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arSaLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arAeLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <inputs>
+            <apiName>Meeting_Conversation</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>Meeting Conversation</masterLabel>
+            <referenceName>Input:Meeting_Conversation</referenceName>
+            <required>true</required>
+        </inputs>
+        <primaryModel>sfdc_ai__DefaultBedrockAnthropicClaude4Sonnet</primaryModel>
+        <status>Published</status>
+    </templateVersions>
+    <templateVersions>
+        <content>You are an expert meeting notes analyst specializing in deal comparison and decision analysis. Analyze the following meeting conversation and extract structured information.
+
+Meeting Conversation:
+{!$Input:Meeting_Conversation}
+
+Analyze this conversation and extract structured comparison information. 
+If the discussion involves comparing options, decisions, or changes between 
+existing and proposed scenarios, organize the information in a comparison format.
+
+Provide your response in the following JSON structure:
+
+{
+ &quot;comparisonType&quot;: &quot;deal_analysis|meeting_summary|other&quot;,
+ &quot;summary&quot;: &quot;Brief executive summary&quot;,
+ &quot;comparisonTable&quot;: [
+  {
+   &quot;parameter&quot;: &quot;Parameter name&quot;,
+   &quot;existingValue&quot;: &quot;Current/existing value&quot;,
+   &quot;proposedValue&quot;: &quot;New/proposed value&quot;, 
+   &quot;notes&quot;: &quot;Notes or rationale for change&quot;,
+   &quot;matchDecision&quot;: &quot;Yes|No|Partial&quot;
+  }
+ ],
+ &quot;keyTopics&quot;: [&quot;topic1&quot;, &quot;topic2&quot;],
+ &quot;actionItems&quot;: [&quot;action1&quot;, &quot;action2&quot;],
+ &quot;decisions&quot;: [&quot;decision1&quot;, &quot;decision2&quot;]
+}
+
+IMPORTANT FORMATTING RULES:
+1. If the conversation involves comparing existing vs proposed values, populate comparisonTable
+2. Each row in comparisonTable should represent one parameter being compared
+3. Use &quot;Yes&quot;, &quot;No&quot;, or &quot;Partial&quot; for matchDecision field
+4. If no comparison is involved, return empty comparisonTable array
+5. Always provide summary, keyTopics, actionItems, and decisions
+
+Example input: &quot;We&apos;re switching from Café A to Café B at Farsi Mall. 
+Rent increases from 12% to 15% as proposed by John. TOR stays monthly 
+for better monitoring. Lease period unchanged at 60 months.&quot;
+
+Example output:
+{
+ &quot;comparisonType&quot;: &quot;deal_analysis&quot;,
+ &quot;summary&quot;: &quot;Brand switch from Café A to Café B with rent adjustment&quot;,
+ &quot;comparisonTable&quot;: [
+  {
+   &quot;parameter&quot;: &quot;Brand Concept&quot;,
+   &quot;existingValue&quot;: &quot;Café A&quot;,
+   &quot;proposedValue&quot;: &quot;Café B&quot;,
+   &quot;notes&quot;: &quot;Switch the brand from Café A to Café B&quot;,
+   &quot;matchDecision&quot;: &quot;Yes&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;Location&quot;, 
+   &quot;existingValue&quot;: &quot;Farsi Mall&quot;,
+   &quot;proposedValue&quot;: &quot;Farsi Mall&quot;,
+   &quot;notes&quot;: &quot;Same location&quot;,
+   &quot;matchDecision&quot;: &quot;Yes&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;Percentage Rent&quot;,
+   &quot;existingValue&quot;: &quot;12%&quot;,
+   &quot;proposedValue&quot;: &quot;15%&quot;,
+   &quot;notes&quot;: &quot;Increase proposed by John&quot;,
+   &quot;matchDecision&quot;: &quot;No&quot;
+  }
+ ],
+ &quot;keyTopics&quot;: [&quot;Brand transition&quot;, &quot;Rent negotiation&quot;],
+ &quot;actionItems&quot;: [&quot;Finalize brand switch documentation&quot;],
+ &quot;decisions&quot;: [&quot;Approved Café B brand change&quot;, &quot;Approved rent increase to 15%&quot;]
+}
+
+</content>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__enUsLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__frFrLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arEgLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arLbLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arSaLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arAeLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <inputs>
+            <apiName>Meeting_Conversation</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>Meeting Conversation</masterLabel>
+            <referenceName>Input:Meeting_Conversation</referenceName>
+            <required>true</required>
+        </inputs>
+        <primaryModel>sfdc_ai__DefaultBedrockAnthropicClaude4Sonnet</primaryModel>
+        <status>Published</status>
+    </templateVersions>
+    <templateVersions>
+        <content>You are an expert meeting notes analyst specializing in deal comparison and decision analysis. Analyze the following meeting conversation and extract structured information.
+
+Meeting Conversation:
+{!$Input:Meeting_Conversation}
+
+Analyze this conversation and extract structured comparison information. 
+If the discussion involves comparing options, decisions, or changes between 
+existing and proposed scenarios, organize the information in a comparison format.
+
+Provide your response in the following JSON structure:
+
+{
+ &quot;comparisonType&quot;: &quot;deal_analysis|meeting_summary|other&quot;,
+ &quot;summary&quot;: &quot;Brief executive summary&quot;,
+ &quot;comparisonTable&quot;: [
+  {
+   &quot;parameter&quot;: &quot;Parameter name&quot;,
+   &quot;existingValue&quot;: &quot;Current/existing value&quot;,
+   &quot;proposedValue&quot;: &quot;New/proposed value&quot;, 
+   &quot;notes&quot;: &quot;Notes or rationale for change&quot;,
+   &quot;matchDecision&quot;: &quot;Yes|No|Partial&quot;
+  }
+ ],
+ &quot;keyTopics&quot;: [&quot;topic1&quot;, &quot;topic2&quot;],
+ &quot;actionItems&quot;: [&quot;action1&quot;, &quot;action2&quot;],
+ &quot;decisions&quot;: [&quot;decision1&quot;, &quot;decision2&quot;]
+}
+
+IMPORTANT FORMATTING RULES:
+1. If the conversation involves comparing existing vs proposed values, populate comparisonTable
+2. Each row in comparisonTable should represent one parameter being compared
+3. Use &quot;Yes&quot;, &quot;No&quot;, or &quot;Partial&quot; for matchDecision field
+4. If no comparison is involved, return empty comparisonTable array
+5. Always provide summary, keyTopics, actionItems, and decisions
+
+Example input: &quot;We&apos;re switching from Café A to Café B at Farsi Mall. 
+Rent increases from 12% to 15% as proposed by John. TOR stays monthly 
+for better monitoring. Lease period unchanged at 60 months.&quot;
+
+Example output:
+{
+ &quot;comparisonType&quot;: &quot;deal_analysis&quot;,
+ &quot;summary&quot;: &quot;Brand switch from Café A to Café B with rent adjustment&quot;,
+ &quot;comparisonTable&quot;: [
+  {
+   &quot;parameter&quot;: &quot;Brand Concept&quot;,
+   &quot;existingValue&quot;: &quot;Café A&quot;,
+   &quot;proposedValue&quot;: &quot;Café B&quot;,
+   &quot;notes&quot;: &quot;Switch the brand from Café A to Café B&quot;,
+   &quot;matchDecision&quot;: &quot;Yes&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;Location&quot;, 
+   &quot;existingValue&quot;: &quot;Farsi Mall&quot;,
+   &quot;proposedValue&quot;: &quot;Farsi Mall&quot;,
+   &quot;notes&quot;: &quot;Same location&quot;,
+   &quot;matchDecision&quot;: &quot;Yes&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;Percentage Rent&quot;,
+   &quot;existingValue&quot;: &quot;12%&quot;,
+   &quot;proposedValue&quot;: &quot;15%&quot;,
+   &quot;notes&quot;: &quot;Increase proposed by John&quot;,
+   &quot;matchDecision&quot;: &quot;No&quot;
+  }
+ ],
+ &quot;keyTopics&quot;: [&quot;Brand transition&quot;, &quot;Rent negotiation&quot;],
+ &quot;actionItems&quot;: [&quot;Finalize brand switch documentation&quot;],
+ &quot;decisions&quot;: [&quot;Approved Café B brand change&quot;, &quot;Approved rent increase to 15%&quot;]
+}
+
+CRITICAL: Return ONLY the raw JSON object. 
+Do not wrap the response in markdown code blocks.
+Do not include ```json or ``` markers.
+Output should start with { and end with }
+</content>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__enUsLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__frFrLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arEgLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arLbLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arSaLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <generationTemplateConfigs>
+            <generationConfigDeveloperName>einstein_gpt__arAeLanguageStyle</generationConfigDeveloperName>
+        </generationTemplateConfigs>
+        <inputs>
+            <apiName>Meeting_Conversation</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>Meeting Conversation</masterLabel>
+            <referenceName>Input:Meeting_Conversation</referenceName>
+            <required>true</required>
+        </inputs>
+        <primaryModel>sfdc_ai__DefaultBedrockAnthropicClaude4Sonnet</primaryModel>
+        <status>Published</status>
+    </templateVersions>
+    <type>einstein_gpt__flex</type>
+    <visibility>Global</visibility>
+</GenAiPromptTemplate>

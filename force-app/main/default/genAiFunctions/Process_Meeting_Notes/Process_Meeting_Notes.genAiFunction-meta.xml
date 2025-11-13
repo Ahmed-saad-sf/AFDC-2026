@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiFunction xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Use this action to process and store meeting notes from a conversation. 
+This action analyzes the raw conversation text using AI to extract:
+- Meeting summary
+- Key topics discussed
+- Action items and owners
+- Decisions made
+- Next steps
+
+The processed notes are automatically saved to the Meeting Notes object.</description>
+    <invocationTarget>MeetingNotesProcessor</invocationTarget>
+    <invocationTargetType>flow</invocationTargetType>
+    <isConfirmationRequired>false</isConfirmationRequired>
+    <masterLabel>Process Meeting Notes</masterLabel>
+</GenAiFunction>

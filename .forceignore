@@ -1,0 +1,43 @@
+# List of files or directories that should be ignored in this project.
+# More information: https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_exclude_source_files.htm
+#
+
+# LWC configuration files
+**/jsconfig.json
+**/.eslintrc.json
+
+# LWC Jest
+**/__tests__/**
+
+# LWC coverage
+**/coverage/**
+
+# Salesforce cache
+.sfdx/
+
+# Local env vars
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Mac
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Package lock files
+package-lock.json
+yarn.lock
+

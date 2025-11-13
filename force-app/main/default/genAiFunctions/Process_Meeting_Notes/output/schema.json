@@ -1,0 +1,33 @@
+{
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "meetingNoteId" : {
+      "title" : "meetingNoteId",
+      "description" : "OUTPUT: meetingNoteId\n\nThe Salesforce record ID of the created Meeting_Note__c record.\n\nThis is already included in the processingStatus message, so you don't need \nto display this separately. \n\nIf the user asks to see the record, you can reference this ID.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : true,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "processedInsights" : {
+      "title" : "processedInsights",
+      "description" : "Processed Insights",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : true,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "processingStatus" : {
+      "title" : "processingStatus",
+      "description" : "OUTPUT: processingStatus\n\nDISPLAY THIS TO USER AS THE MAIN RESPONSE.\n\nThis contains a formatted, conversational message with:\n- Confirmation of successful processing\n- Preview of extracted insights\n- Meeting note record ID\n- Follow-up engagement question\n\nPresent this output directly to the user without modification.\nUse the formatting (emojis, bullets) as-is to maintain visual appeal.\n\nDO NOT JUST SAY \"Success\" - show the full formatted message.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : true,
+      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:useHydratedPrompt" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

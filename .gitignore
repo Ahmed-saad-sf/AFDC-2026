@@ -94,3 +94,7 @@ Icon?
 **/__pycache__/
 **/*.pyc
 
+# External reference libraries
+afv-library/
+agent-sdk/
+

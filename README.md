@@ -70,6 +70,8 @@ force-app/main/default/
 ## Documentation
 
 - [Agentforce Metadata API Guide](./AGENTFORCE_METADATA_GUIDE.md) - Comprehensive guide on Agentforce metadata types and deployment
+- [Agentforce Deployment Guide](./docs/AGENTFORCE_DEPLOYMENT_GUIDE.md) - **⭐ Best practices, requirements, and step-by-step deployment process** (read this first!)
+- [Agentforce Reference Documentation](./docs/agentforce-references/README.md) - Official Salesforce reference documentation
 
 ## Key Features
 

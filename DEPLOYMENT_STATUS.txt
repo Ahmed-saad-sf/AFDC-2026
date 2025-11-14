@@ -1,0 +1,17 @@
+## Deployment Status - SUCCESS ✅
+
+**AF_Decision_Maker Agent Deployment Completed Successfully!**
+
+✅ **Bot**: Successfully deployed (ID: 0XxKB000000LYfK0AW)
+✅ **BotVersion**: Successfully deployed (ID: 0X9KB000001R3nE0AS)  
+✅ **GenAiPlannerBundle**: Already deployed (ID: 16jKB000000L7MnYAK)
+
+**Deployment Summary:**
+- Bot metadata updated with context variables
+- BotVersion deployed with custom welcome messages and error handling
+- BotVersion linked to AF_Decision_Maker GenAiPlannerBundle
+- All conversation variables configured with proper visibility
+
+**Next Steps:**
+- Activate the agent version if needed: `sf agent activate`
+- Test the agent in Salesforce UI

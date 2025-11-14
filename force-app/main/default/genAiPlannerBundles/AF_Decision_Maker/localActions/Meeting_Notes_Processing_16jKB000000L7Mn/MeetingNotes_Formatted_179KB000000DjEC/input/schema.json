@@ -1,0 +1,35 @@
+{
+  "required" : [ "MeetingTitle", "conversationText" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "MeetingTitle" : {
+      "title" : "MeetingTitle",
+      "description" : "Title or subject of the meeting",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "conversationText" : {
+      "title" : "conversationText",
+      "description" : "Raw conversation data from Agentforce session",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "participantId" : {
+      "title" : "participantId",
+      "description" : "ID of the meeting participant or owner",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "rawNotes" : {
+      "title" : "rawNotes",
+      "description" : "raw notes from the user input",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

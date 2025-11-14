@@ -7,11 +7,43 @@ public class UniversalAgentforceTableFormatter {
         Response res = new Response();
         
         try {
+            // Validate input
+            if (String.isBlank(req.jsonResponse)) {
+                res.formattedOutput = '❌ Error: JSON response is blank';
+                res.formattedHtml = res.formattedOutput;
+                res.plainText = res.formattedOutput;
+                res.success = false;
+                return new List<Response>{ res };
+            }
+            
             // Clean JSON if it has markdown code fences
             String cleanedJson = cleanJson(req.jsonResponse);
             
-            Map<String, Object> data = 
-                (Map<String, Object>) JSON.deserializeUntyped(cleanedJson);
+            // Parse JSON with error handling
+            Map<String, Object> data = null;
+            try {
+                Object parsedObj = JSON.deserializeUntyped(cleanedJson);
+                if (parsedObj instanceof Map<String, Object>) {
+                    data = (Map<String, Object>) parsedObj;
+                } else {
+                    throw new IllegalArgumentException('JSON root is not an object');
+                }
+            } catch (Exception e) {
+                res.formattedOutput = '❌ Error parsing JSON: ' + e.getMessage();
+                res.formattedHtml = res.formattedOutput;
+                res.plainText = res.formattedOutput;
+                res.success = false;
+                return new List<Response>{ res };
+            }
+            
+            // Validate data is not null
+            if (data == null) {
+                res.formattedOutput = '❌ Error: Failed to parse JSON data';
+                res.formattedHtml = res.formattedOutput;
+                res.plainText = res.formattedOutput;
+                res.success = false;
+                return new List<Response>{ res };
+            }
             
             // Determine output format - FORCE MARKDOWN for Agentforce
             String outputFormat = String.isBlank(req.outputFormat) ? 'markdown' : req.outputFormat.toLowerCase();
@@ -26,19 +58,37 @@ public class UniversalAgentforceTableFormatter {
             }
             
             res.formattedHtml = res.formattedOutput; // Backward compatibility
-            res.plainText = buildPlainTextResponse(data, req.recordId);
+            
+            // Build plain text response with null check
+            try {
+                res.plainText = buildPlainTextResponse(data, req.recordId);
+            } catch (Exception e) {
+                System.debug('Error building plain text: ' + e.getMessage());
+                res.plainText = res.formattedOutput; // Fallback to formatted output
+            }
             
             // Prepare component data for LWC
-            Map<String, Object> componentDataMap = new Map<String, Object>{
-                'meetingData' => JSON.serialize(data),
-                'recordId' => req.recordId,
-                'title' => 'Meeting Notes Analysis'
-            };
-            res.componentData = JSON.serialize(componentDataMap);
-            res.componentName = 'c:meetingNotesDisplay';
+            if (data != null) {
+                try {
+                    Map<String, Object> componentDataMap = new Map<String, Object>{
+                        'meetingData' => JSON.serialize(data),
+                        'recordId' => req.recordId != null ? req.recordId : '',
+                        'title' => 'Meeting Notes Analysis'
+                    };
+                    res.componentData = JSON.serialize(componentDataMap);
+                    res.componentName = 'c:meetingNotesDisplay';
+                } catch (Exception e) {
+                    System.debug('Error preparing component data: ' + e.getMessage());
+                    res.componentData = '';
+                    res.componentName = '';
+                }
+            } else {
+                res.componentData = '';
+                res.componentName = '';
+            }
             
             res.success = true;
-            res.tablesDetected = detectTableCount(data);
+            res.tablesDetected = data != null ? detectTableCount(data) : 0;
             
         } catch (Exception e) {
             res.formattedOutput = '❌ Error formatting response: ' + e.getMessage();
@@ -80,15 +130,79 @@ public class UniversalAgentforceTableFormatter {
     // MARKDOWN RESPONSE BUILDER
     // ============================================================
     private static String buildMarkdownResponse(Map<String, Object> data, String recordId) {
+        // Validate input
+        if (data == null) {
+            return '# ❌ Error\n\nUnable to process data: data is null.\n';
+        }
+        
         String markdown = '';
         
         // Header
         markdown += '# ✅ Analysis Complete\n\n';
         
-        // Process each field in the JSON
-        for (String key : data.keySet()) {
-            Object value = data.get(key);
-            markdown += processFieldMarkdown(key, value);
+        // Show summary if available
+        if (data.containsKey('summary') && data.get('summary') != null) {
+            Object summaryObj = data.get('summary');
+            String summary = summaryObj != null ? String.valueOf(summaryObj) : '';
+            if (String.isNotBlank(summary)) {
+                markdown += '**Summary:** ' + summary + '\n\n';
+            }
+        }
+        
+        // Process comparison table first if it exists
+        if (data.containsKey('comparisonTable') && data.get('comparisonTable') != null) {
+            Object tableObj = data.get('comparisonTable');
+            if (tableObj != null && tableObj instanceof List<Object>) {
+                markdown += buildComparisonTableMarkdown((List<Object>) tableObj);
+            }
+        }
+        
+        // Process other fields (keyTopics, actionItems, decisions) BEFORE final decision
+        if (data.keySet() != null) {
+            // First, process keyTopics
+            if (data.containsKey('keyTopics') && data.get('keyTopics') != null) {
+                Object keyTopicsObj = data.get('keyTopics');
+                if (keyTopicsObj != null) {
+                    markdown += processFieldMarkdown('keyTopics', keyTopicsObj);
+                }
+            }
+            
+            // Then show final decision after key topics
+            if (data.containsKey('finalDecision') && data.get('finalDecision') != null) {
+                Object finalDecisionObj = data.get('finalDecision');
+                String finalDecision = finalDecisionObj != null ? String.valueOf(finalDecisionObj) : '';
+                if (String.isNotBlank(finalDecision)) {
+                    String decisionIcon = finalDecision == 'Go' ? '✅' : '❌';
+                    markdown += '\n## ' + decisionIcon + ' **Final Decision: ' + finalDecision + '**\n\n';
+                    if (finalDecision == 'No Go') {
+                        markdown += '⚠️ **Note:** The final decision is **No Go** because not all parameters match the existing deal in CRM.\n\n';
+                    }
+                }
+            }
+            
+            // Then process other fields (actionItems, etc.) - skip decisions
+            for (String key : data.keySet()) {
+                if (String.isBlank(key)) {
+                    continue;
+                }
+                
+                String lowerKey = key.toLowerCase();
+                
+                // Skip fields we've already processed or don't want to display
+                if (key == 'summary' || key == 'finalDecision' || key == 'comparisonTable' || 
+                    key == 'brandConcept' || key == 'location' || key == 'unitName' ||
+                    key == 'opportunityFound' || key == 'existingOpportunityId' || 
+                    key == 'existingOpportunityName' || key == 'keyTopics' ||
+                    lowerKey == 'comparisontype' || lowerKey == 'comparison_type' ||
+                    lowerKey == 'decisions' || lowerKey == 'decision') {
+                    continue;
+                }
+                
+                Object value = data.get(key);
+                if (value != null) {
+                    markdown += processFieldMarkdown(key, value);
+                }
+            }
         }
         
         // Record Link
@@ -101,6 +215,98 @@ public class UniversalAgentforceTableFormatter {
         markdown += '\n---\n\n';
         markdown += '*Would you like me to analyze another meeting or help with something else?*\n';
         
+        return markdown;
+    }
+    
+    // ============================================================
+    // COMPARISON TABLE MARKDOWN BUILDER
+    // ============================================================
+    private static String buildComparisonTableMarkdown(List<Object> tableData) {
+        if (tableData == null || tableData.isEmpty()) {
+            return '';
+        }
+        
+        String markdown = '';
+        markdown += '\n## 📊 Decision Comparison Matrix\n\n';
+        
+        // Table Header - exact format per user request
+        markdown += '| Parameter | Existing Deal in CRM | DAC Decision | Notes for New Deal | Match Decision |\n';
+        markdown += '|-----------|---------------------|--------------|-------------------|----------------|\n';
+        
+        // Table Body
+        for (Object rowObj : tableData) {
+            if (rowObj == null) {
+                continue; // Skip null rows
+            }
+            
+            if (!(rowObj instanceof Map<String, Object>)) {
+                continue; // Skip if not a map
+            }
+            
+            Map<String, Object> row = (Map<String, Object>) rowObj;
+            if (row == null) {
+                continue; // Skip null maps
+            }
+            
+            // Safely get values with null checks
+            Object paramObj = row.get('parameter');
+            Object existingObj = row.get('existingDealInCRM');
+            Object dacObj = row.get('dacDecision');
+            Object notesObj = row.get('notesForNewDeal');
+            Object matchObj = row.get('matchDecision');
+            
+            String parameter = paramObj != null ? String.valueOf(paramObj) : '';
+            String existingDeal = existingObj != null ? String.valueOf(existingObj) : '';
+            String dacDecision = dacObj != null ? String.valueOf(dacObj) : '';
+            String notes = notesObj != null ? String.valueOf(notesObj) : '';
+            String matchDecision = matchObj != null ? String.valueOf(matchObj) : '';
+            
+            // Skip if parameter is blank
+            if (String.isBlank(parameter)) {
+                continue;
+            }
+            
+            // Format existing deal - show "Opportunity Not found" if null/blank/Not found
+            if (String.isBlank(existingDeal) || existingDeal == 'null' || existingDeal == 'Not found') {
+                existingDeal = 'Opportunity Not found';
+            }
+            
+            // Format DAC Decision - based on meeting notes (e.g., "Cafe B" or "Farsi Mall")
+            String dacDecisionFormatted = String.isNotBlank(dacDecision) ? dacDecision : '—';
+            
+            // Format Notes for New Deal - explanatory notes (e.g., "Switch the brand from Cafe A to Cafe B")
+            String notesFormatted = String.isNotBlank(notes) ? notes : '—';
+            
+            // Format match decision with icon
+            String matchIcon = '';
+            if (matchDecision == 'Yes') {
+                matchIcon = '✅ **Yes**';
+            } else if (matchDecision == 'No') {
+                matchIcon = '❌ **No**';
+            } else if (matchDecision == 'Partial') {
+                matchIcon = '⚠️ **Partial**';
+            } else {
+                matchIcon = String.isNotBlank(matchDecision) ? matchDecision : '❌ **No**';
+            }
+            
+            // Escape pipe characters (handle null strings)
+            if (String.isNotBlank(parameter)) {
+                parameter = parameter.replace('|', '\\|');
+            }
+            if (String.isNotBlank(existingDeal)) {
+                existingDeal = existingDeal.replace('|', '\\|');
+            }
+            if (String.isNotBlank(dacDecisionFormatted)) {
+                dacDecisionFormatted = dacDecisionFormatted.replace('|', '\\|');
+            }
+            if (String.isNotBlank(notesFormatted)) {
+                notesFormatted = notesFormatted.replace('|', '\\|');
+            }
+            
+            markdown += '| ' + parameter + ' | ' + existingDeal + ' | ' + dacDecisionFormatted + ' | ' + notesFormatted + ' | ' + matchIcon + ' |\n';
+        }
+        
+        markdown += '\n';
         return markdown;
     }
     
@@ -718,12 +924,25 @@ public class UniversalAgentforceTableFormatter {
     }
     
     private static Integer detectTableCount(Map<String, Object> data) {
+        if (data == null) {
+            return 0;
+        }
         Integer count = 0;
-        for (String key : data.keySet()) {
-            Object value = data.get(key);
-            if (value instanceof List<Object>) {
-                if (isTable((List<Object>) value)) {
-                    count++;
+        if (data.keySet() != null) {
+            for (String key : data.keySet()) {
+                if (String.isBlank(key)) {
+                    continue;
+                }
+                Object value = data.get(key);
+                if (value != null && value instanceof List<Object>) {
+                    try {
+                        if (isTable((List<Object>) value)) {
+                            count++;
+                        }
+                    } catch (Exception e) {
+                        System.debug('Error checking if value is table: ' + e.getMessage());
+                        continue;
+                    }
                 }
             }
         }
@@ -731,14 +950,27 @@ public class UniversalAgentforceTableFormatter {
     }
     
     private static String buildPlainTextResponse(Map<String, Object> data, String recordId) {
+        if (data == null) {
+            return 'Unable to process data: data is null.';
+        }
         String text = '✅ Analysis Complete\n\n';
         
-        for (String key : data.keySet()) {
-            text += formatFieldName(key) + ':\n';
-            text += String.valueOf(data.get(key)) + '\n\n';
+        if (data.keySet() != null) {
+            for (String key : data.keySet()) {
+                if (String.isBlank(key)) {
+                    continue;
+                }
+                Object value = data.get(key);
+                if (value != null) {
+                    text += formatFieldName(key) + ':\n';
+                    text += String.valueOf(value) + '\n\n';
+                }
+            }
         }
         
-        text += '\n🔗 View record: ' + recordId + '\n';
+        if (String.isNotBlank(recordId)) {
+            text += '\n🔗 View record: ' + recordId + '\n';
+        }
         
         return text;
     }

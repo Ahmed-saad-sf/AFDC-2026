@@ -120,14 +120,39 @@ FORMATTING: Use bullets, bold, clear paragraphs</description>
             <sortOrder>0</sortOrder>
         </genAiPluginInstructions>
         <genAiPluginInstructions>
-            <description>PRESENTING RESULTS:
+            <description>DEAL DECISION ANALYSIS WORKFLOW:
+
+1. PROCESSING MEETING NOTES:
+- The system extracts deal parameters: Brand Concept, Location, Unit Name, Percentage Rent, TOR Frequency, NER Applicability, Lease Period, RCD
+- Identifies DAC Decisions for each parameter from the meeting notes
+- Queries the Opportunity org to find existing deals matching Brand + Location + Unit Name
+
+2. DECISION MATRIX LOGIC:
+- The system creates a comparison table with columns:
+  * Parameter
+  * Existing Deal in CRM (from Opportunity query)
+  * DAC Decision (from meeting)
+  * Notes for New Deal
+  * Match Decision (Yes/No/Partial)
+- Compares each parameter&apos;s DAC Decision with the existing deal value
+- Sets matchDecision: &quot;Yes&quot; if values match, &quot;No&quot; if they don&apos;t, &quot;Partial&quot; if partially matching
+
+3. FINAL DECISION RULE:
+- CRITICAL: Unless ALL match decisions are &quot;Yes&quot;, the final decision MUST be &quot;No Go&quot;
+- Only if EVERY parameter has matchDecision = &quot;Yes&quot;, then finalDecision = &quot;Go&quot;
+- If ANY parameter has matchDecision = &quot;No&quot; or &quot;Partial&quot;, then finalDecision = &quot;No Go&quot;
+- This rule is automatically enforced by the system
+
+4. PRESENTING RESULTS:
 
 When the Process Meeting Notes action completes:
 
 DO:
 ✓ Show ONLY the processingStatus message to the user (ONCE)
-✓ Preserve all formatting (emojis, bullets, line breaks)
-✓ Present it as your main response
+✓ Preserve all formatting (emojis, bullets, line breaks, tables)
+✓ Present the complete comparison table with all columns
+✓ Highlight the Final Decision prominently (Go/No Go)
+✓ If No Go, explain which parameters caused the decision
 ✓ Wait for user&apos;s response before offering more help
 
 DO NOT:
@@ -138,18 +163,15 @@ DO NOT:
 ✗ Show processedInsights or any other output - ONLY show processingStatus
 ✗ Repeat the same message twice
 
-EXAMPLE BAD RESPONSE:
-&quot;The meeting notes have been successfully processed.&quot;
-[Then showing the same message again]
-
 EXAMPLE GOOD RESPONSE:
-[Show the full processingStatus message exactly as formatted - ONLY ONCE]
+[Show the full processingStatus message with comparison table and final decision - ONLY ONCE]
 
 5. HANDLING FOLLOW-UP:
 
 After showing results, wait for user input:
 - If they say &quot;yes&quot; or &quot;another meeting&quot; → ready to process more notes
 - If they ask about the record → provide details about accessing it
+- If final decision is No Go → explain which parameters need to be aligned
 - If they&apos;re done → thank them warmly</description>
             <developerName>instruction_1</developerName>
             <language xsi:nil="true"/>

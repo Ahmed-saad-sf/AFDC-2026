@@ -1,46 +1,92 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <activeVersionIdentifier>UgqwvaQQ/mb5sque30ZtlPG+kwe4tIwThE+dtdHKpUA=_3</activeVersionIdentifier>
     <description>Analyzes raw meeting conversation data and extracts structured meeting notes including topics, action items, and key decisions</description>
     <developerName>Meeting_Notes_Analyzer</developerName>
     <masterLabel>Meeting Notes Analyzer</masterLabel>
     <templateVersions>
-        <content>You are an expert meeting notes assistant. Analyze the following meeting conversation and extract structured information.
+        <content>You are an expert meeting notes analyst specializing in deal comparison and decision analysis. Analyze the following meeting conversation and extract structured information.
 
 Meeting Conversation:
 {!$Input:Meeting_Conversation}
 
-Please analyze this conversation and provide a structured summary with the following format:
+CRITICAL REQUIREMENTS:
+1. Extract deal parameters from the conversation: Brand Concept, Location, Unit Name, Percentage Rent, TOR Frequency, NER Applicability, Lease Period, RCD
+2. For each parameter, identify the DAC Decision (decision made in the meeting)
+3. Extract brandConcept, location, and unitName at the top level for CRM querying
+4. The system will compare DAC Decisions with Existing Deal in CRM and set matchDecision automatically
 
-MEETING SUMMARY:
-[Provide a 2-3 sentence executive summary of the meeting]
+Provide your response in the following JSON structure:
 
-KEY TOPICS DISCUSSED:
-- [Topic 1]
-- [Topic 2]
-- [Continue as needed]
-
-ACTION ITEMS:
-- [Action item with owner if mentioned]
-- [Continue as needed]
-
-DECISIONS MADE:
-- [Decision 1]
-- [Continue as needed]
-
-NEXT STEPS:
-- [Next step 1]
-- [Continue as needed]
-
-Format your response as valid JSON with the following structure:
 {
- &quot;summary&quot;: &quot;executive summary text&quot;,
- &quot;topics&quot;: [&quot;topic1&quot;, &quot;topic2&quot;],
- &quot;actionItems&quot;: [&quot;action1&quot;, &quot;action2&quot;],
- &quot;decisions&quot;: [&quot;decision1&quot;, &quot;decision2&quot;],
- &quot;nextSteps&quot;: [&quot;step1&quot;, &quot;step2&quot;]
+ &quot;comparisonType&quot;: &quot;deal_analysis&quot;,
+ &quot;summary&quot;: &quot;Brief executive summary&quot;,
+ &quot;brandConcept&quot;: &quot;Brand name (e.g., Café B)&quot;,
+ &quot;location&quot;: &quot;Location name (e.g., Farsi Mall)&quot;,
+ &quot;unitName&quot;: &quot;Unit name if mentioned (e.g., A1, B1, A1-B1)&quot;,
+ &quot;comparisonTable&quot;: [
+  {
+   &quot;parameter&quot;: &quot;Brand Concept&quot;,
+   &quot;dacDecision&quot;: &quot;What has been discussed in the meeting (e.g., Café B)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Rationale or explanation&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;Location&quot;,
+   &quot;dacDecision&quot;: &quot;What has been discussed about location&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Notes about location&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;Percentage Rent&quot;,
+   &quot;dacDecision&quot;: &quot;What has been discussed about rent (e.g., 15%)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Notes about rent change&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;TOR Frequency&quot;,
+   &quot;dacDecision&quot;: &quot;What has been discussed about TOR frequency (e.g., Monthly)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Notes about TOR frequency&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;NER Applicability&quot;,
+   &quot;dacDecision&quot;: &quot;What has been discussed about NER (e.g., Basic Rent only)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Notes about NER&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;Lease Period&quot;,
+   &quot;dacDecision&quot;: &quot;What has been discussed about lease period (e.g., 60 months)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Notes about lease period&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;RCD&quot;,
+   &quot;dacDecision&quot;: &quot;What has been discussed about RCD (e.g., 1-Nov-2025)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Notes about RCD&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  }
+ ],
+ &quot;keyTopics&quot;: [&quot;topic1&quot;, &quot;topic2&quot;],
+ &quot;actionItems&quot;: [&quot;action1&quot;, &quot;action2&quot;],
+ &quot;decisions&quot;: [&quot;decision1&quot;, &quot;decision2&quot;],
+ &quot;finalDecision&quot;: &quot;Pending&quot;
 }
 
-</content>
+IMPORTANT RULES:
+1. Extract ALL deal parameters mentioned in the conversation
+2. Set matchDecision to &quot;Pending&quot; for all parameters (will be set by system after CRM query)
+3. Set finalDecision to &quot;Pending&quot; (will be calculated after comparisons)
+4. Include brandConcept, location, and unitName at top level (required for CRM query)
+5. Only include parameters that are mentioned in the conversation
+6. Use exact values as mentioned (e.g., &quot;15%&quot; not &quot;15 percent&quot;)
+7. The dacDecision field should contain what has been discussed in the meeting notes, not what exists in CRM. The system will compare this with existing CRM data automatically.
+
+CRITICAL: Return ONLY the raw JSON object. 
+Do not wrap the response in markdown code blocks.
+Do not include ```json or ``` markers.
+Output should start with { and end with }</content>
         <generationTemplateConfigs>
             <generationConfigDeveloperName>einstein_gpt__enUsLanguageStyle</generationConfigDeveloperName>
         </generationTemplateConfigs>
@@ -71,6 +117,7 @@ Format your response as valid JSON with the following structure:
         </inputs>
         <primaryModel>sfdc_ai__DefaultBedrockAnthropicClaude4Sonnet</primaryModel>
         <status>Published</status>
+        <versionIdentifier>UgqwvaQQ/mb5sque30ZtlPG+kwe4tIwThE+dtdHKpUA=_1</versionIdentifier>
     </templateVersions>
     <templateVersions>
         <content>You are an expert meeting notes analyst specializing in deal comparison and decision analysis. Analyze the following meeting conversation and extract structured information.
@@ -78,73 +125,83 @@ Format your response as valid JSON with the following structure:
 Meeting Conversation:
 {!$Input:Meeting_Conversation}
 
-Analyze this conversation and extract structured comparison information. 
-If the discussion involves comparing options, decisions, or changes between 
-existing and proposed scenarios, organize the information in a comparison format.
+CRITICAL REQUIREMENTS:
+1. Extract deal parameters from the conversation: Brand Concept, Location, Unit Name, Percentage Rent, TOR Frequency, NER Applicability, Lease Period, RCD
+2. For each parameter, identify the DAC Decision (decision made in the meeting)
+3. Extract brandConcept, location, and unitName at the top level for CRM querying
+4. The system will compare DAC Decisions with Existing Deal in CRM and set matchDecision automatically
 
 Provide your response in the following JSON structure:
 
 {
- &quot;comparisonType&quot;: &quot;deal_analysis|meeting_summary|other&quot;,
- &quot;summary&quot;: &quot;Brief executive summary&quot;,
- &quot;comparisonTable&quot;: [
-  {
-   &quot;parameter&quot;: &quot;Parameter name&quot;,
-   &quot;existingValue&quot;: &quot;Current/existing value&quot;,
-   &quot;proposedValue&quot;: &quot;New/proposed value&quot;, 
-   &quot;notes&quot;: &quot;Notes or rationale for change&quot;,
-   &quot;matchDecision&quot;: &quot;Yes|No|Partial&quot;
-  }
- ],
- &quot;keyTopics&quot;: [&quot;topic1&quot;, &quot;topic2&quot;],
- &quot;actionItems&quot;: [&quot;action1&quot;, &quot;action2&quot;],
- &quot;decisions&quot;: [&quot;decision1&quot;, &quot;decision2&quot;]
+ &quot;comparisonType&quot;: &quot;deal_analysis&quot;,
+ &quot;summary&quot;: &quot;Brief executive summary&quot;,
+ &quot;brandConcept&quot;: &quot;Brand name (e.g., Café B)&quot;,
+ &quot;location&quot;: &quot;Location name (e.g., Farsi Mall)&quot;,
+ &quot;unitName&quot;: &quot;Unit name if mentioned (e.g., A1, B1, A1-B1)&quot;,
+ &quot;comparisonTable&quot;: [
+  {
+   &quot;parameter&quot;: &quot;Brand Concept&quot;,
+   &quot;dacDecision&quot;: &quot;What has been discussed in the meeting (e.g., Café B)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Rationale or explanation&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;Location&quot;,
+   &quot;dacDecision&quot;: &quot;What has been discussed about location&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Notes about location&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;Percentage Rent&quot;,
+   &quot;dacDecision&quot;: &quot;What has been discussed about rent (e.g., 15%)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Notes about rent change&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;TOR Frequency&quot;,
+   &quot;dacDecision&quot;: &quot;What has been discussed about TOR frequency (e.g., Monthly)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Notes about TOR frequency&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;NER Applicability&quot;,
+   &quot;dacDecision&quot;: &quot;What has been discussed about NER (e.g., Basic Rent only)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Notes about NER&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;Lease Period&quot;,
+   &quot;dacDecision&quot;: &quot;What has been discussed about lease period (e.g., 60 months)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Notes about lease period&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;RCD&quot;,
+   &quot;dacDecision&quot;: &quot;What has been discussed about RCD (e.g., 1-Nov-2025)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Notes about RCD&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  }
+ ],
+ &quot;keyTopics&quot;: [&quot;topic1&quot;, &quot;topic2&quot;],
+ &quot;actionItems&quot;: [&quot;action1&quot;, &quot;action2&quot;],
+ &quot;decisions&quot;: [&quot;decision1&quot;, &quot;decision2&quot;],
+ &quot;finalDecision&quot;: &quot;Pending&quot;
 }
 
-IMPORTANT FORMATTING RULES:
-1. If the conversation involves comparing existing vs proposed values, populate comparisonTable
-2. Each row in comparisonTable should represent one parameter being compared
-3. Use &quot;Yes&quot;, &quot;No&quot;, or &quot;Partial&quot; for matchDecision field
-4. If no comparison is involved, return empty comparisonTable array
-5. Always provide summary, keyTopics, actionItems, and decisions
+IMPORTANT RULES:
+1. Extract ALL deal parameters mentioned in the conversation
+2. Set matchDecision to &quot;Pending&quot; for all parameters (will be set by system after CRM query)
+3. Set finalDecision to &quot;Pending&quot; (will be calculated after comparisons)
+4. Include brandConcept, location, and unitName at top level (required for CRM query)
+5. Only include parameters that are mentioned in the conversation
+6. Use exact values as mentioned (e.g., &quot;15%&quot; not &quot;15 percent&quot;)
+7. The dacDecision field should contain what has been discussed in the meeting notes, not what exists in CRM. The system will compare this with existing CRM data automatically.
 
-Example input: &quot;We&apos;re switching from Café A to Café B at Farsi Mall. 
-Rent increases from 12% to 15% as proposed by John. TOR stays monthly 
-for better monitoring. Lease period unchanged at 60 months.&quot;
-
-Example output:
-{
- &quot;comparisonType&quot;: &quot;deal_analysis&quot;,
- &quot;summary&quot;: &quot;Brand switch from Café A to Café B with rent adjustment&quot;,
- &quot;comparisonTable&quot;: [
-  {
-   &quot;parameter&quot;: &quot;Brand Concept&quot;,
-   &quot;existingValue&quot;: &quot;Café A&quot;,
-   &quot;proposedValue&quot;: &quot;Café B&quot;,
-   &quot;notes&quot;: &quot;Switch the brand from Café A to Café B&quot;,
-   &quot;matchDecision&quot;: &quot;Yes&quot;
-  },
-  {
-   &quot;parameter&quot;: &quot;Location&quot;, 
-   &quot;existingValue&quot;: &quot;Farsi Mall&quot;,
-   &quot;proposedValue&quot;: &quot;Farsi Mall&quot;,
-   &quot;notes&quot;: &quot;Same location&quot;,
-   &quot;matchDecision&quot;: &quot;Yes&quot;
-  },
-  {
-   &quot;parameter&quot;: &quot;Percentage Rent&quot;,
-   &quot;existingValue&quot;: &quot;12%&quot;,
-   &quot;proposedValue&quot;: &quot;15%&quot;,
-   &quot;notes&quot;: &quot;Increase proposed by John&quot;,
-   &quot;matchDecision&quot;: &quot;No&quot;
-  }
- ],
- &quot;keyTopics&quot;: [&quot;Brand transition&quot;, &quot;Rent negotiation&quot;],
- &quot;actionItems&quot;: [&quot;Finalize brand switch documentation&quot;],
- &quot;decisions&quot;: [&quot;Approved Café B brand change&quot;, &quot;Approved rent increase to 15%&quot;]
-}
-
-</content>
+CRITICAL: Return ONLY the raw JSON object. 
+Do not wrap the response in markdown code blocks.
+Do not include ```json or ``` markers.
+Output should start with { and end with }</content>
         <generationTemplateConfigs>
             <generationConfigDeveloperName>einstein_gpt__enUsLanguageStyle</generationConfigDeveloperName>
         </generationTemplateConfigs>
@@ -175,6 +232,7 @@ Example output:
         </inputs>
         <primaryModel>sfdc_ai__DefaultBedrockAnthropicClaude4Sonnet</primaryModel>
         <status>Published</status>
+        <versionIdentifier>UgqwvaQQ/mb5sque30ZtlPG+kwe4tIwThE+dtdHKpUA=_2</versionIdentifier>
     </templateVersions>
     <templateVersions>
         <content>You are an expert meeting notes analyst specializing in deal comparison and decision analysis. Analyze the following meeting conversation and extract structured information.
@@ -283,6 +341,7 @@ Output should start with { and end with }
         </inputs>
         <primaryModel>sfdc_ai__DefaultBedrockAnthropicClaude4Sonnet</primaryModel>
         <status>Published</status>
+        <versionIdentifier>UgqwvaQQ/mb5sque30ZtlPG+kwe4tIwThE+dtdHKpUA=_3</versionIdentifier>
     </templateVersions>
     <type>einstein_gpt__flex</type>
     <visibility>Global</visibility>

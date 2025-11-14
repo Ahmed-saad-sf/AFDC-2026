@@ -57,7 +57,7 @@
         <actionName>Meeting_Notes_Analyzer</actionName>
         <actionType>generatePromptResponse</actionType>
         <connector>
-            <targetReference>Extract_Summary_from_Response</targetReference>
+            <targetReference>Process_Deal_Comparison</targetReference>
         </connector>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
         <inputParameters>
@@ -71,6 +71,40 @@
             <assignToReference>llmResponse</assignToReference>
             <name>promptResponse</name>
         </outputParameters>
+    </actionCalls>
+    <actionCalls>
+        <name>Process_Deal_Comparison</name>
+        <label>Process Deal Comparison with CRM Query</label>
+        <locationX>176</locationX>
+        <locationY>242</locationY>
+        <actionName>DealComparisonProcessor</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>Automatic</flowTransactionModel>
+        <inputParameters>
+            <name>jsonResponse</name>
+            <value>
+                <elementReference>llmResponse</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>DealComparisonProcessor</nameSegment>
+        <outputParameters>
+            <assignToReference>llmResponse</assignToReference>
+            <name>updatedJsonResponse</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>finalDecision</assignToReference>
+            <name>finalDecision</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>opportunityFound</assignToReference>
+            <name>opportunityFound</name>
+        </outputParameters>
+        <faultConnector>
+            <targetReference>Set_Error_Message</targetReference>
+        </faultConnector>
+        <connector>
+            <targetReference>Extract_Summary_from_Response</targetReference>
+        </connector>
     </actionCalls>
     <apiVersion>60.0</apiVersion>
     <assignments>
@@ -278,6 +312,22 @@
         <isCollection>false</isCollection>
         <isInput>true</isInput>
         <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description>Final decision (Go/No Go)</description>
+        <name>finalDecision</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+    <variables>
+        <description>Whether Opportunity was found in CRM</description>
+        <name>opportunityFound</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
     </variables>
     <variables>
         <name>systemPrompt</name>

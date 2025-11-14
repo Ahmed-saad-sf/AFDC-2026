@@ -4,7 +4,7 @@
         <name>Format_JSON_Response_with_Dynamic_Tables_Action</name>
         <label>Format JSON Response with Dynamic Tables Action</label>
         <locationX>176</locationX>
-        <locationY>566</locationY>
+        <locationY>674</locationY>
         <actionName>UniversalAgentforceTableFormatter</actionName>
         <actionType>apex</actionType>
         <flowTransactionModel>Automatic</flowTransactionModel>
@@ -111,7 +111,7 @@
         <name>Extract_Summary_from_Response</name>
         <label>Extract Summary from Response</label>
         <locationX>176</locationX>
-        <locationY>242</locationY>
+        <locationY>350</locationY>
         <assignmentItems>
             <assignToReference>meetingSummary</assignToReference>
             <operator>Assign</operator>
@@ -127,7 +127,7 @@
         <name>Assign_Processed_Insights</name>
         <label>Assign Processed Insights</label>
         <locationX>176</locationX>
-        <locationY>674</locationY>
+        <locationY>782</locationY>
         <assignmentItems>
             <assignToReference>processedInsights</assignToReference>
             <operator>Assign</operator>
@@ -153,7 +153,7 @@
         <name>Set_Success_Message</name>
         <label>Set Success Message</label>
         <locationX>176</locationX>
-        <locationY>458</locationY>
+        <locationY>566</locationY>
         <assignmentItems>
             <assignToReference>processingStatus</assignToReference>
             <operator>Assign</operator>
@@ -185,7 +185,7 @@
         <name>Create_Meeting_Note_Record</name>
         <label>Create Meeting Note Record</label>
         <locationX>176</locationX>
-        <locationY>350</locationY>
+        <locationY>458</locationY>
         <connector>
             <targetReference>Set_Success_Message</targetReference>
         </connector>

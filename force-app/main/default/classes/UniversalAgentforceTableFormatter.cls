@@ -153,8 +153,18 @@ public class UniversalAgentforceTableFormatter {
         if (data.containsKey('comparisonTable') && data.get('comparisonTable') != null) {
             Object tableObj = data.get('comparisonTable');
             if (tableObj != null && tableObj instanceof List<Object>) {
-                markdown += buildComparisonTableMarkdown((List<Object>) tableObj);
+                List<Object> tableList = (List<Object>) tableObj;
+                System.debug('Comparison table found with ' + tableList.size() + ' rows');
+                if (!tableList.isEmpty()) {
+                    markdown += buildComparisonTableMarkdown(tableList);
+                } else {
+                    System.debug('Comparison table is empty - no rows to display');
+                }
+            } else {
+                System.debug('Comparison table is not a List<Object>');
             }
+        } else {
+            System.debug('Comparison table not found in data or is null');
         }
         
         // Process other fields (keyTopics, actionItems, decisions) BEFORE final decision

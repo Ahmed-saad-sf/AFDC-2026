@@ -51,6 +51,7 @@ public with sharing class DealComparisonProcessor {
             // Get comparison table - handle null case
             List<Object> comparisonTable = null;
             Object comparisonTableObj = jsonData.get('comparisonTable');
+            
             if (comparisonTableObj != null) {
                 if (comparisonTableObj instanceof List<Object>) {
                     comparisonTable = (List<Object>) comparisonTableObj;
@@ -74,12 +75,45 @@ public with sharing class DealComparisonProcessor {
                     
                     Map<String, Object> row = (Map<String, Object>) rowObj;
                     
-                    // Get parameter and dacDecision with null checks
+                    // Get parameter, dacDecision, and notesForNewDeal with null checks
+                    // Try multiple field name variations (LLM might use different names)
                     String parameter = row.get('parameter') != null ? String.valueOf(row.get('parameter')) : null;
-                    String dacDecision = row.get('dacDecision') != null ? String.valueOf(row.get('dacDecision')) : null;
+                    
+                    // Try dacDecision, proposedValue, or newValue
+                    String dacDecision = null;
+                    if (row.get('dacDecision') != null && String.isNotBlank(String.valueOf(row.get('dacDecision')))) {
+                        dacDecision = String.valueOf(row.get('dacDecision'));
+                    } else if (row.get('proposedValue') != null && String.isNotBlank(String.valueOf(row.get('proposedValue')))) {
+                        dacDecision = String.valueOf(row.get('proposedValue'));
+                    } else if (row.get('newValue') != null && String.isNotBlank(String.valueOf(row.get('newValue')))) {
+                        dacDecision = String.valueOf(row.get('newValue'));
+                    }
+                    
+                    // Try notesForNewDeal, notes, or description
+                    String notesForNewDeal = null;
+                    if (row.get('notesForNewDeal') != null && String.isNotBlank(String.valueOf(row.get('notesForNewDeal')))) {
+                        notesForNewDeal = String.valueOf(row.get('notesForNewDeal'));
+                    } else if (row.get('notes') != null && String.isNotBlank(String.valueOf(row.get('notes')))) {
+                        notesForNewDeal = String.valueOf(row.get('notes'));
+                    } else if (row.get('description') != null && String.isNotBlank(String.valueOf(row.get('description')))) {
+                        notesForNewDeal = String.valueOf(row.get('description'));
+                    }
                     
                     // Skip if parameter is null
                     if (String.isBlank(parameter)) {
+                        continue;
+                    }
+                    
+                    // Validate that we extracted real values
+                    String dacLower = dacDecision != null ? dacDecision.toLowerCase().trim() : '';
+                    if (String.isBlank(dacDecision) || 
+                        dacDecision == 'null' || 
+                        dacDecision == '—' ||
+                        dacLower.contains('what has been discussed') ||
+                        dacLower.contains('actual value from conversation') ||
+                        (dacLower.contains('pending') && dacLower.length() < 20) || // Only skip if it's just "pending" not "pending approval"
+                        dacDecision.trim().length() == 0) {
+                        // Skip this row - parameter was not actually mentioned in conversation
                         continue;
                     }
                     
@@ -88,6 +122,28 @@ public with sharing class DealComparisonProcessor {
                     
                     // Compare and set matchDecision
                     String matchDecision = compareValues(existingValue, dacDecision, parameter);
+                    
+                    // Preserve all original fields and add new ones
+                    // ALWAYS preserve dacDecision and notesForNewDeal from the row (they should come from LLM)
+                    // If they exist in the row, use them; otherwise check if we extracted them
+                    if (row.containsKey('dacDecision') && row.get('dacDecision') != null) {
+                        // Keep the original value from LLM
+                        String existingDac = String.valueOf(row.get('dacDecision'));
+                        row.put('dacDecision', String.isNotBlank(existingDac) ? existingDac : (String.isNotBlank(dacDecision) ? dacDecision : ''));
+                    } else {
+                        // If not in row, use extracted value or empty
+                        row.put('dacDecision', String.isNotBlank(dacDecision) ? dacDecision : '');
+                    }
+                    
+                    if (row.containsKey('notesForNewDeal') && row.get('notesForNewDeal') != null) {
+                        // Keep the original value from LLM
+                        String existingNotes = String.valueOf(row.get('notesForNewDeal'));
+                        row.put('notesForNewDeal', String.isNotBlank(existingNotes) ? existingNotes : (String.isNotBlank(notesForNewDeal) ? notesForNewDeal : ''));
+                    } else {
+                        // If not in row, use extracted value or empty
+                        row.put('notesForNewDeal', String.isNotBlank(notesForNewDeal) ? notesForNewDeal : '');
+                    }
+                    
                     row.put('existingDealInCRM', existingValue != null ? existingValue : 'Not found');
                     row.put('matchDecision', matchDecision != null ? matchDecision : 'No');
                     

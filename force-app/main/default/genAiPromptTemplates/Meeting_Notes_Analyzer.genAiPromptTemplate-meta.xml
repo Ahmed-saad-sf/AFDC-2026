@@ -10,13 +10,79 @@
 Meeting Conversation:
 {!$Input:Meeting_Conversation}
 
-CRITICAL REQUIREMENTS:
-1. Extract deal parameters from the conversation: Brand Concept, Location, Unit Name, Percentage Rent, TOR Frequency, NER Applicability, Lease Period, RCD
-2. For each parameter, identify the DAC Decision (decision made in the meeting)
-3. Extract brandConcept, location, and unitName at the top level for CRM querying
-4. The system will compare DAC Decisions with Existing Deal in CRM and set matchDecision automatically
+STEP-BY-STEP EXTRACTION PROCESS:
 
-Provide your response in the following JSON structure:
+STEP 1: Read the entire conversation carefully and identify ALL deal-related parameters mentioned:
+- Brand Concept (e.g., Café A, Café B, Restaurant X)
+- Location (e.g., Farsi Mall, Downtown Plaza)
+- Unit Name (e.g., A1, B1, A1-B1)
+- Percentage Rent (e.g., 12%, 15%, 20%)
+- TOR Frequency (e.g., Monthly, Quarterly, Annually)
+- NER Applicability (e.g., Basic Rent only, All charges)
+- Lease Period (e.g., 60 months, 5 years)
+- RCD - Rent Commencement Date (e.g., 1-Nov-2025, January 2026)
+
+STEP 2: For EACH parameter you identified in STEP 1, extract TWO pieces of information:
+   a) DAC Decision: The EXACT value or decision mentioned in the conversation
+      - Example: If conversation says "we decided on Café B", then dacDecision = "Café B"
+      - Example: If conversation says "rent will be 15%", then dacDecision = "15%"
+      - Example: If conversation says "TOR monthly", then dacDecision = "Monthly"
+   
+   b) Notes for New Deal: The context or explanation around that decision
+      - Example: If conversation says "switch from Café A to Café B", then notesForNewDeal = "Switch the brand from Café A to Café B"
+      - Example: If conversation says "increase rent from 12% to 15%", then notesForNewDeal = "Increase rent from 12% to 15%"
+      - Example: If conversation says "TOR frequency changed to monthly", then notesForNewDeal = "TOR frequency changed to monthly"
+
+STEP 3: Extract brandConcept, location, and unitName at the top level for CRM querying
+
+STEP 4: Build the comparisonTable array - THIS IS MANDATORY:
+- The comparisonTable field is REQUIRED and MUST be included in your JSON response
+- For EACH parameter you identified in STEP 1, create a row in the comparisonTable array
+- Each row MUST have: parameter, dacDecision, notesForNewDeal, and matchDecision (set to "Pending")
+- DO NOT omit the comparisonTable field - it is required for the system to function
+
+CRITICAL: 
+1. The comparisonTable field is MANDATORY - you MUST include it in your JSON response
+2. You MUST populate both dacDecision and notesForNewDeal for EVERY parameter row
+3. These fields CANNOT be empty, null, or contain placeholder text
+4. Extract ACTUAL values from the conversation
+5. If no parameters are mentioned, return an empty array: "comparisonTable": []
+
+EXAMPLE: If the conversation mentions &quot;We decided to switch from Café A to Café B at Farsi Mall, and increase rent from 12% to 15%&quot;, your comparisonTable should look like:
+
+{
+ &quot;comparisonType&quot;: &quot;deal_analysis&quot;,
+ &quot;summary&quot;: &quot;Brand switch and rent increase discussed&quot;,
+ &quot;brandConcept&quot;: &quot;Café B&quot;,
+ &quot;location&quot;: &quot;Farsi Mall&quot;,
+ &quot;unitName&quot;: &quot;&quot;,
+ &quot;comparisonTable&quot;: [
+  {
+   &quot;parameter&quot;: &quot;Brand Concept&quot;,
+   &quot;dacDecision&quot;: &quot;Café B&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Switch the brand from Café A to Café B&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;Location&quot;,
+   &quot;dacDecision&quot;: &quot;Farsi Mall&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Location remains Farsi Mall&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;Percentage Rent&quot;,
+   &quot;dacDecision&quot;: &quot;15%&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Increase rent from 12% to 15%&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  }
+ ],
+ &quot;keyTopics&quot;: [&quot;Brand transition&quot;, &quot;Rent negotiation&quot;],
+ &quot;actionItems&quot;: [],
+ &quot;decisions&quot;: [],
+ &quot;finalDecision&quot;: &quot;Pending&quot;
+}
+
+Provide your response in the following JSON structure (use ACTUAL values from the conversation, not placeholders):
 
 {
  &quot;comparisonType&quot;: &quot;deal_analysis&quot;,
@@ -27,44 +93,44 @@ Provide your response in the following JSON structure:
  &quot;comparisonTable&quot;: [
   {
    &quot;parameter&quot;: &quot;Brand Concept&quot;,
-   &quot;dacDecision&quot;: &quot;What has been discussed in the meeting (e.g., Café B)&quot;,
-   &quot;notesForNewDeal&quot;: &quot;Rationale or explanation&quot;,
+   &quot;dacDecision&quot;: &quot;ACTUAL VALUE FROM CONVERSATION (e.g., Café B)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;ACTUAL EXPLANATION FROM CONVERSATION (e.g., Switch the brand from Café A to Café B)&quot;,
    &quot;matchDecision&quot;: &quot;Pending&quot;
   },
   {
    &quot;parameter&quot;: &quot;Location&quot;,
-   &quot;dacDecision&quot;: &quot;What has been discussed about location&quot;,
-   &quot;notesForNewDeal&quot;: &quot;Notes about location&quot;,
+   &quot;dacDecision&quot;: &quot;ACTUAL VALUE FROM CONVERSATION (e.g., Farsi Mall)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;ACTUAL EXPLANATION FROM CONVERSATION (e.g., Location remains Farsi Mall)&quot;,
    &quot;matchDecision&quot;: &quot;Pending&quot;
   },
   {
    &quot;parameter&quot;: &quot;Percentage Rent&quot;,
-   &quot;dacDecision&quot;: &quot;What has been discussed about rent (e.g., 15%)&quot;,
-   &quot;notesForNewDeal&quot;: &quot;Notes about rent change&quot;,
+   &quot;dacDecision&quot;: &quot;ACTUAL VALUE FROM CONVERSATION (e.g., 15%)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;ACTUAL EXPLANATION FROM CONVERSATION (e.g., Increase rent from 12% to 15%)&quot;,
    &quot;matchDecision&quot;: &quot;Pending&quot;
   },
   {
    &quot;parameter&quot;: &quot;TOR Frequency&quot;,
-   &quot;dacDecision&quot;: &quot;What has been discussed about TOR frequency (e.g., Monthly)&quot;,
-   &quot;notesForNewDeal&quot;: &quot;Notes about TOR frequency&quot;,
+   &quot;dacDecision&quot;: &quot;ACTUAL VALUE FROM CONVERSATION (e.g., Monthly)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;ACTUAL EXPLANATION FROM CONVERSATION (e.g., TOR frequency set to Monthly)&quot;,
    &quot;matchDecision&quot;: &quot;Pending&quot;
   },
   {
    &quot;parameter&quot;: &quot;NER Applicability&quot;,
-   &quot;dacDecision&quot;: &quot;What has been discussed about NER (e.g., Basic Rent only)&quot;,
-   &quot;notesForNewDeal&quot;: &quot;Notes about NER&quot;,
+   &quot;dacDecision&quot;: &quot;ACTUAL VALUE FROM CONVERSATION (e.g., Basic Rent only)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;ACTUAL EXPLANATION FROM CONVERSATION (e.g., NER applies to Basic Rent only)&quot;,
    &quot;matchDecision&quot;: &quot;Pending&quot;
   },
   {
    &quot;parameter&quot;: &quot;Lease Period&quot;,
-   &quot;dacDecision&quot;: &quot;What has been discussed about lease period (e.g., 60 months)&quot;,
-   &quot;notesForNewDeal&quot;: &quot;Notes about lease period&quot;,
+   &quot;dacDecision&quot;: &quot;ACTUAL VALUE FROM CONVERSATION (e.g., 60 months)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;ACTUAL EXPLANATION FROM CONVERSATION (e.g., Lease period set to 60 months)&quot;,
    &quot;matchDecision&quot;: &quot;Pending&quot;
   },
   {
    &quot;parameter&quot;: &quot;RCD&quot;,
-   &quot;dacDecision&quot;: &quot;What has been discussed about RCD (e.g., 1-Nov-2025)&quot;,
-   &quot;notesForNewDeal&quot;: &quot;Notes about RCD&quot;,
+   &quot;dacDecision&quot;: &quot;ACTUAL VALUE FROM CONVERSATION (e.g., 1-Nov-2025)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;ACTUAL EXPLANATION FROM CONVERSATION (e.g., Rent commencement date set to 1-Nov-2025)&quot;,
    &quot;matchDecision&quot;: &quot;Pending&quot;
   }
  ],
@@ -74,19 +140,29 @@ Provide your response in the following JSON structure:
  &quot;finalDecision&quot;: &quot;Pending&quot;
 }
 
-IMPORTANT RULES:
-1. Extract ALL deal parameters mentioned in the conversation
-2. Set matchDecision to &quot;Pending&quot; for all parameters (will be set by system after CRM query)
-3. Set finalDecision to &quot;Pending&quot; (will be calculated after comparisons)
-4. Include brandConcept, location, and unitName at top level (required for CRM query)
-5. Only include parameters that are mentioned in the conversation
-6. Use exact values as mentioned (e.g., &quot;15%&quot; not &quot;15 percent&quot;)
-7. The dacDecision field should contain what has been discussed in the meeting notes, not what exists in CRM. The system will compare this with existing CRM data automatically.
+CRITICAL EXTRACTION RULES:
+1. ONLY include parameters that are ACTUALLY MENTIONED in the conversation - do NOT create rows for parameters that are not discussed
+2. For EACH parameter that IS mentioned, you MUST extract and provide:
+   - dacDecision: The EXACT value discussed/decided in the meeting (e.g., if conversation says &quot;Café B&quot;, use &quot;Café B&quot; - NOT &quot;What has been discussed&quot; or any placeholder)
+   - notesForNewDeal: The EXACT explanation or context from the conversation (e.g., if conversation says &quot;switch from Café A to Café B&quot;, use &quot;Switch the brand from Café A to Café B&quot; - NOT &quot;Notes about&quot; or any placeholder)
+3. If a parameter is NOT mentioned in the conversation, DO NOT include it in the comparisonTable array at all
+4. Set matchDecision to &quot;Pending&quot; for all parameters (will be set by system after CRM query)
+5. Set finalDecision to &quot;Pending&quot; (will be calculated after comparisons)
+6. Include brandConcept, location, and unitName at top level (required for CRM query)
+7. Use exact values as mentioned in conversation (e.g., &quot;15%&quot; not &quot;15 percent&quot;, &quot;Café B&quot; not &quot;cafe b&quot;)
+8. The dacDecision field should contain what has been discussed in the meeting notes, not what exists in CRM
+9. DO NOT use placeholder text like &quot;What has been discussed&quot; or &quot;Notes about&quot; or &quot;ACTUAL VALUE FROM CONVERSATION&quot; - extract ACTUAL values and explanations from the conversation
+10. If you cannot extract a real value for dacDecision from the conversation, DO NOT include that parameter in the comparisonTable array
+11. The comparisonTable array should ONLY contain parameters that were actually discussed with real values extracted
 
-CRITICAL: Return ONLY the raw JSON object. 
-Do not wrap the response in markdown code blocks.
-Do not include ```json or ``` markers.
-Output should start with { and end with }</content>
+MANDATORY JSON STRUCTURE REQUIREMENTS:
+1. You MUST include the comparisonTable field in your response - it is required
+2. The comparisonTable must be an array (even if empty)
+3. Return ONLY the raw JSON object
+4. Do not wrap the response in markdown code blocks
+5. Do not include ```json or ``` markers
+6. Output should start with { and end with }
+7. The comparisonTable field is NOT optional - it must be present in every response</content>
         <generationTemplateConfigs>
             <generationConfigDeveloperName>einstein_gpt__enUsLanguageStyle</generationConfigDeveloperName>
         </generationTemplateConfigs>
@@ -125,13 +201,79 @@ Output should start with { and end with }</content>
 Meeting Conversation:
 {!$Input:Meeting_Conversation}
 
-CRITICAL REQUIREMENTS:
-1. Extract deal parameters from the conversation: Brand Concept, Location, Unit Name, Percentage Rent, TOR Frequency, NER Applicability, Lease Period, RCD
-2. For each parameter, identify the DAC Decision (decision made in the meeting)
-3. Extract brandConcept, location, and unitName at the top level for CRM querying
-4. The system will compare DAC Decisions with Existing Deal in CRM and set matchDecision automatically
+STEP-BY-STEP EXTRACTION PROCESS:
 
-Provide your response in the following JSON structure:
+STEP 1: Read the entire conversation carefully and identify ALL deal-related parameters mentioned:
+- Brand Concept (e.g., Café A, Café B, Restaurant X)
+- Location (e.g., Farsi Mall, Downtown Plaza)
+- Unit Name (e.g., A1, B1, A1-B1)
+- Percentage Rent (e.g., 12%, 15%, 20%)
+- TOR Frequency (e.g., Monthly, Quarterly, Annually)
+- NER Applicability (e.g., Basic Rent only, All charges)
+- Lease Period (e.g., 60 months, 5 years)
+- RCD - Rent Commencement Date (e.g., 1-Nov-2025, January 2026)
+
+STEP 2: For EACH parameter you identified in STEP 1, extract TWO pieces of information:
+   a) DAC Decision: The EXACT value or decision mentioned in the conversation
+      - Example: If conversation says "we decided on Café B", then dacDecision = "Café B"
+      - Example: If conversation says "rent will be 15%", then dacDecision = "15%"
+      - Example: If conversation says "TOR monthly", then dacDecision = "Monthly"
+   
+   b) Notes for New Deal: The context or explanation around that decision
+      - Example: If conversation says "switch from Café A to Café B", then notesForNewDeal = "Switch the brand from Café A to Café B"
+      - Example: If conversation says "increase rent from 12% to 15%", then notesForNewDeal = "Increase rent from 12% to 15%"
+      - Example: If conversation says "TOR frequency changed to monthly", then notesForNewDeal = "TOR frequency changed to monthly"
+
+STEP 3: Extract brandConcept, location, and unitName at the top level for CRM querying
+
+STEP 4: Build the comparisonTable array - THIS IS MANDATORY:
+- The comparisonTable field is REQUIRED and MUST be included in your JSON response
+- For EACH parameter you identified in STEP 1, create a row in the comparisonTable array
+- Each row MUST have: parameter, dacDecision, notesForNewDeal, and matchDecision (set to "Pending")
+- DO NOT omit the comparisonTable field - it is required for the system to function
+
+CRITICAL: 
+1. The comparisonTable field is MANDATORY - you MUST include it in your JSON response
+2. You MUST populate both dacDecision and notesForNewDeal for EVERY parameter row
+3. These fields CANNOT be empty, null, or contain placeholder text
+4. Extract ACTUAL values from the conversation
+5. If no parameters are mentioned, return an empty array: "comparisonTable": []
+
+EXAMPLE: If the conversation mentions &quot;We decided to switch from Café A to Café B at Farsi Mall, and increase rent from 12% to 15%&quot;, your comparisonTable should look like:
+
+{
+ &quot;comparisonType&quot;: &quot;deal_analysis&quot;,
+ &quot;summary&quot;: &quot;Brand switch and rent increase discussed&quot;,
+ &quot;brandConcept&quot;: &quot;Café B&quot;,
+ &quot;location&quot;: &quot;Farsi Mall&quot;,
+ &quot;unitName&quot;: &quot;&quot;,
+ &quot;comparisonTable&quot;: [
+  {
+   &quot;parameter&quot;: &quot;Brand Concept&quot;,
+   &quot;dacDecision&quot;: &quot;Café B&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Switch the brand from Café A to Café B&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;Location&quot;,
+   &quot;dacDecision&quot;: &quot;Farsi Mall&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Location remains Farsi Mall&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  },
+  {
+   &quot;parameter&quot;: &quot;Percentage Rent&quot;,
+   &quot;dacDecision&quot;: &quot;15%&quot;,
+   &quot;notesForNewDeal&quot;: &quot;Increase rent from 12% to 15%&quot;,
+   &quot;matchDecision&quot;: &quot;Pending&quot;
+  }
+ ],
+ &quot;keyTopics&quot;: [&quot;Brand transition&quot;, &quot;Rent negotiation&quot;],
+ &quot;actionItems&quot;: [],
+ &quot;decisions&quot;: [],
+ &quot;finalDecision&quot;: &quot;Pending&quot;
+}
+
+Provide your response in the following JSON structure (use ACTUAL values from the conversation, not placeholders):
 
 {
  &quot;comparisonType&quot;: &quot;deal_analysis&quot;,
@@ -142,44 +284,44 @@ Provide your response in the following JSON structure:
  &quot;comparisonTable&quot;: [
   {
    &quot;parameter&quot;: &quot;Brand Concept&quot;,
-   &quot;dacDecision&quot;: &quot;What has been discussed in the meeting (e.g., Café B)&quot;,
-   &quot;notesForNewDeal&quot;: &quot;Rationale or explanation&quot;,
+   &quot;dacDecision&quot;: &quot;ACTUAL VALUE FROM CONVERSATION (e.g., Café B)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;ACTUAL EXPLANATION FROM CONVERSATION (e.g., Switch the brand from Café A to Café B)&quot;,
    &quot;matchDecision&quot;: &quot;Pending&quot;
   },
   {
    &quot;parameter&quot;: &quot;Location&quot;,
-   &quot;dacDecision&quot;: &quot;What has been discussed about location&quot;,
-   &quot;notesForNewDeal&quot;: &quot;Notes about location&quot;,
+   &quot;dacDecision&quot;: &quot;ACTUAL VALUE FROM CONVERSATION (e.g., Farsi Mall)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;ACTUAL EXPLANATION FROM CONVERSATION (e.g., Location remains Farsi Mall)&quot;,
    &quot;matchDecision&quot;: &quot;Pending&quot;
   },
   {
    &quot;parameter&quot;: &quot;Percentage Rent&quot;,
-   &quot;dacDecision&quot;: &quot;What has been discussed about rent (e.g., 15%)&quot;,
-   &quot;notesForNewDeal&quot;: &quot;Notes about rent change&quot;,
+   &quot;dacDecision&quot;: &quot;ACTUAL VALUE FROM CONVERSATION (e.g., 15%)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;ACTUAL EXPLANATION FROM CONVERSATION (e.g., Increase rent from 12% to 15%)&quot;,
    &quot;matchDecision&quot;: &quot;Pending&quot;
   },
   {
    &quot;parameter&quot;: &quot;TOR Frequency&quot;,
-   &quot;dacDecision&quot;: &quot;What has been discussed about TOR frequency (e.g., Monthly)&quot;,
-   &quot;notesForNewDeal&quot;: &quot;Notes about TOR frequency&quot;,
+   &quot;dacDecision&quot;: &quot;ACTUAL VALUE FROM CONVERSATION (e.g., Monthly)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;ACTUAL EXPLANATION FROM CONVERSATION (e.g., TOR frequency set to Monthly)&quot;,
    &quot;matchDecision&quot;: &quot;Pending&quot;
   },
   {
    &quot;parameter&quot;: &quot;NER Applicability&quot;,
-   &quot;dacDecision&quot;: &quot;What has been discussed about NER (e.g., Basic Rent only)&quot;,
-   &quot;notesForNewDeal&quot;: &quot;Notes about NER&quot;,
+   &quot;dacDecision&quot;: &quot;ACTUAL VALUE FROM CONVERSATION (e.g., Basic Rent only)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;ACTUAL EXPLANATION FROM CONVERSATION (e.g., NER applies to Basic Rent only)&quot;,
    &quot;matchDecision&quot;: &quot;Pending&quot;
   },
   {
    &quot;parameter&quot;: &quot;Lease Period&quot;,
-   &quot;dacDecision&quot;: &quot;What has been discussed about lease period (e.g., 60 months)&quot;,
-   &quot;notesForNewDeal&quot;: &quot;Notes about lease period&quot;,
+   &quot;dacDecision&quot;: &quot;ACTUAL VALUE FROM CONVERSATION (e.g., 60 months)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;ACTUAL EXPLANATION FROM CONVERSATION (e.g., Lease period set to 60 months)&quot;,
    &quot;matchDecision&quot;: &quot;Pending&quot;
   },
   {
    &quot;parameter&quot;: &quot;RCD&quot;,
-   &quot;dacDecision&quot;: &quot;What has been discussed about RCD (e.g., 1-Nov-2025)&quot;,
-   &quot;notesForNewDeal&quot;: &quot;Notes about RCD&quot;,
+   &quot;dacDecision&quot;: &quot;ACTUAL VALUE FROM CONVERSATION (e.g., 1-Nov-2025)&quot;,
+   &quot;notesForNewDeal&quot;: &quot;ACTUAL EXPLANATION FROM CONVERSATION (e.g., Rent commencement date set to 1-Nov-2025)&quot;,
    &quot;matchDecision&quot;: &quot;Pending&quot;
   }
  ],
@@ -189,19 +331,29 @@ Provide your response in the following JSON structure:
  &quot;finalDecision&quot;: &quot;Pending&quot;
 }
 
-IMPORTANT RULES:
-1. Extract ALL deal parameters mentioned in the conversation
-2. Set matchDecision to &quot;Pending&quot; for all parameters (will be set by system after CRM query)
-3. Set finalDecision to &quot;Pending&quot; (will be calculated after comparisons)
-4. Include brandConcept, location, and unitName at top level (required for CRM query)
-5. Only include parameters that are mentioned in the conversation
-6. Use exact values as mentioned (e.g., &quot;15%&quot; not &quot;15 percent&quot;)
-7. The dacDecision field should contain what has been discussed in the meeting notes, not what exists in CRM. The system will compare this with existing CRM data automatically.
+CRITICAL EXTRACTION RULES:
+1. ONLY include parameters that are ACTUALLY MENTIONED in the conversation - do NOT create rows for parameters that are not discussed
+2. For EACH parameter that IS mentioned, you MUST extract and provide:
+   - dacDecision: The EXACT value discussed/decided in the meeting (e.g., if conversation says &quot;Café B&quot;, use &quot;Café B&quot; - NOT &quot;What has been discussed&quot; or any placeholder)
+   - notesForNewDeal: The EXACT explanation or context from the conversation (e.g., if conversation says &quot;switch from Café A to Café B&quot;, use &quot;Switch the brand from Café A to Café B&quot; - NOT &quot;Notes about&quot; or any placeholder)
+3. If a parameter is NOT mentioned in the conversation, DO NOT include it in the comparisonTable array at all
+4. Set matchDecision to &quot;Pending&quot; for all parameters (will be set by system after CRM query)
+5. Set finalDecision to &quot;Pending&quot; (will be calculated after comparisons)
+6. Include brandConcept, location, and unitName at top level (required for CRM query)
+7. Use exact values as mentioned in conversation (e.g., &quot;15%&quot; not &quot;15 percent&quot;, &quot;Café B&quot; not &quot;cafe b&quot;)
+8. The dacDecision field should contain what has been discussed in the meeting notes, not what exists in CRM
+9. DO NOT use placeholder text like &quot;What has been discussed&quot; or &quot;Notes about&quot; or &quot;ACTUAL VALUE FROM CONVERSATION&quot; - extract ACTUAL values and explanations from the conversation
+10. If you cannot extract a real value for dacDecision from the conversation, DO NOT include that parameter in the comparisonTable array
+11. The comparisonTable array should ONLY contain parameters that were actually discussed with real values extracted
 
-CRITICAL: Return ONLY the raw JSON object. 
-Do not wrap the response in markdown code blocks.
-Do not include ```json or ``` markers.
-Output should start with { and end with }</content>
+MANDATORY JSON STRUCTURE REQUIREMENTS:
+1. You MUST include the comparisonTable field in your response - it is required
+2. The comparisonTable must be an array (even if empty)
+3. Return ONLY the raw JSON object
+4. Do not wrap the response in markdown code blocks
+5. Do not include ```json or ``` markers
+6. Output should start with { and end with }
+7. The comparisonTable field is NOT optional - it must be present in every response</content>
         <generationTemplateConfigs>
             <generationConfigDeveloperName>einstein_gpt__enUsLanguageStyle</generationConfigDeveloperName>
         </generationTemplateConfigs>
@@ -306,10 +458,14 @@ Example output:
  &quot;decisions&quot;: [&quot;Approved Café B brand change&quot;, &quot;Approved rent increase to 15%&quot;]
 }
 
-CRITICAL: Return ONLY the raw JSON object. 
-Do not wrap the response in markdown code blocks.
-Do not include ```json or ``` markers.
-Output should start with { and end with }
+MANDATORY JSON STRUCTURE REQUIREMENTS:
+1. You MUST include the comparisonTable field in your response - it is required
+2. The comparisonTable must be an array (even if empty)
+3. Return ONLY the raw JSON object
+4. Do not wrap the response in markdown code blocks
+5. Do not include ```json or ``` markers
+6. Output should start with { and end with }
+7. The comparisonTable field is NOT optional - it must be present in every response
 </content>
         <generationTemplateConfigs>
             <generationConfigDeveloperName>einstein_gpt__enUsLanguageStyle</generationConfigDeveloperName>

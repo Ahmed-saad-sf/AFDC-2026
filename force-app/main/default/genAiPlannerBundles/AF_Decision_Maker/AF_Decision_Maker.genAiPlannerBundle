@@ -125,7 +125,7 @@ FORMATTING: Use bullets, bold, clear paragraphs</description>
 When the Process Meeting Notes action completes:
 
 DO:
-✓ Show the complete processingStatus message to the user
+✓ Show ONLY the processingStatus message to the user (ONCE)
 ✓ Preserve all formatting (emojis, bullets, line breaks)
 ✓ Present it as your main response
 ✓ Wait for user&apos;s response before offering more help
@@ -135,12 +135,15 @@ DO NOT:
 ✗ Summarize the processingStatus - show it in full
 ✗ Add extra commentary on top of the message
 ✗ Remove the formatting
+✗ Show processedInsights or any other output - ONLY show processingStatus
+✗ Repeat the same message twice
 
 EXAMPLE BAD RESPONSE:
 &quot;The meeting notes have been successfully processed.&quot;
+[Then showing the same message again]
 
 EXAMPLE GOOD RESPONSE:
-[Show the full processingStatus message exactly as formatted]
+[Show the full processingStatus message exactly as formatted - ONLY ONCE]
 
 5. HANDLING FOLLOW-UP:
 

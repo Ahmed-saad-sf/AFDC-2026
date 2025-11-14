@@ -17,7 +17,7 @@
         <inputParameters>
             <name>outputFormat</name>
             <value>
-                <elementReference>formatLLM_Response</elementReference>
+                <stringValue>markdown</stringValue>
             </value>
         </inputParameters>
         <inputParameters>
@@ -35,12 +35,19 @@
         <nameSegment>UniversalAgentforceTableFormatter</nameSegment>
         <outputParameters>
             <assignToReference>processingStatus</assignToReference>
-            <name>formattedHtml</name>
-        </outputParameters>
-        <outputParameters>
-            <assignToReference>processingStatus</assignToReference>
             <name>formattedOutput</name>
         </outputParameters>
+        <outputParameters>
+            <assignToReference>componentData</assignToReference>
+            <name>componentData</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>componentName</assignToReference>
+            <name>componentName</name>
+        </outputParameters>
+        <connector>
+            <targetReference>Assign_Processed_Insights</targetReference>
+        </connector>
     </actionCalls>
     <actionCalls>
         <name>Process_Meeting_Notes_with_LLM</name>
@@ -83,6 +90,19 @@
         </connector>
     </assignments>
     <assignments>
+        <name>Assign_Processed_Insights</name>
+        <label>Assign Processed Insights</label>
+        <locationX>176</locationX>
+        <locationY>674</locationY>
+        <assignmentItems>
+            <assignToReference>processedInsights</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>processingStatus</elementReference>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <assignments>
         <name>Set_Error_Message</name>
         <label>Set Error Message</label>
         <locationX>440</locationX>
@@ -104,7 +124,7 @@
             <assignToReference>processingStatus</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>llmResponse</elementReference>
+                <stringValue>Processing...</stringValue>
             </value>
         </assignmentItems>
         <connector>
@@ -166,7 +186,7 @@
             <targetReference>Process_Meeting_Notes_with_LLM</targetReference>
         </connector>
     </start>
-    <status>Draft</status>
+    <status>Active</status>
     <variables>
         <description>Raw conversation data from Agentforce session</description>
         <name>conversationText</name>
@@ -176,7 +196,16 @@
         <isOutput>false</isOutput>
     </variables>
     <variables>
-        <name>formatLLM_Response</name>
+        <description>Component data for LWC rendering</description>
+        <name>componentData</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+    <variables>
+        <description>LWC component name</description>
+        <name>componentName</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>

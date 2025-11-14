@@ -13,18 +13,30 @@ public class UniversalAgentforceTableFormatter {
             Map<String, Object> data = 
                 (Map<String, Object>) JSON.deserializeUntyped(cleanedJson);
             
-            // Determine output format
-            String outputFormat = String.isBlank(req.outputFormat) ? 'html' : req.outputFormat.toLowerCase();
+            // Determine output format - FORCE MARKDOWN for Agentforce
+            String outputFormat = String.isBlank(req.outputFormat) ? 'markdown' : req.outputFormat.toLowerCase();
             
+            // Always use markdown for Agentforce compatibility
             // Build formatted response based on format
-            if (outputFormat == 'markdown') {
+            if (outputFormat == 'markdown' || outputFormat == 'md') {
                 res.formattedOutput = buildMarkdownResponse(data, req.recordId);
             } else {
-                res.formattedOutput = buildDynamicHTMLResponse(data, req.recordId, req.tableStyling);
+                // Fallback to markdown even if HTML requested (for Agentforce)
+                res.formattedOutput = buildMarkdownResponse(data, req.recordId);
             }
             
             res.formattedHtml = res.formattedOutput; // Backward compatibility
             res.plainText = buildPlainTextResponse(data, req.recordId);
+            
+            // Prepare component data for LWC
+            Map<String, Object> componentDataMap = new Map<String, Object>{
+                'meetingData' => JSON.serialize(data),
+                'recordId' => req.recordId,
+                'title' => 'Meeting Notes Analysis'
+            };
+            res.componentData = JSON.serialize(componentDataMap);
+            res.componentName = 'c:meetingNotesDisplay';
+            
             res.success = true;
             res.tablesDetected = detectTableCount(data);
             
@@ -759,6 +771,12 @@ public class UniversalAgentforceTableFormatter {
         
         @InvocableVariable(label='Plain Text Fallback')
         public String plainText;
+        
+        @InvocableVariable(label='Component Data (JSON for LWC)')
+        public String componentData;
+        
+        @InvocableVariable(label='Component Name (LWC)')
+        public String componentName;
         
         @InvocableVariable(label='Success')
         public Boolean success;

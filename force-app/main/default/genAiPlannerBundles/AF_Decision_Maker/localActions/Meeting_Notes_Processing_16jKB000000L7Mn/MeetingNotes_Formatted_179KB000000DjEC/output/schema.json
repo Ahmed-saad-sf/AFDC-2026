@@ -12,20 +12,38 @@
     },
     "processedInsights" : {
       "title" : "processedInsights",
-      "description" : "Processing insights",
+      "description" : "Processing insights (internal use only)",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : false,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "processingStatus" : {
+      "title" : "processingStatus",
+      "description" : "Returned LLM Response (Markdown formatted)",
       "lightning:type" : "lightning__textType",
       "lightning:isPII" : false,
       "copilotAction:isDisplayable" : true,
       "copilotAction:isUsedByPlanner" : true,
       "copilotAction:useHydratedPrompt" : false
     },
-    "processingStatus" : {
-      "title" : "processingStatus",
-      "description" : "Returned LLM Response",
+    "componentData" : {
+      "title" : "componentData",
+      "description" : "JSON data for LWC component rendering",
       "lightning:type" : "lightning__textType",
       "lightning:isPII" : false,
-      "copilotAction:isDisplayable" : true,
-      "copilotAction:isUsedByPlanner" : true,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : false,
+      "copilotAction:useHydratedPrompt" : false
+    },
+    "componentName" : {
+      "title" : "componentName",
+      "description" : "Lightning Web Component name for rendering",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isDisplayable" : false,
+      "copilotAction:isUsedByPlanner" : false,
       "copilotAction:useHydratedPrompt" : false
     }
   },

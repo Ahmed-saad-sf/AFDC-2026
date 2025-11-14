@@ -1,0 +1,93 @@
+<template>
+    <lightning-card title={title} icon-name="standard:note">
+        <div class="slds-p-around_medium">
+            <template if:true={hasData}>
+                <template for:each={sections} for:item="section">
+                    <div key={section.key} class="slds-m-bottom_large">
+                        <!-- Section Header -->
+                        <h3 class="slds-text-heading_small slds-m-bottom_small">
+                            <span class="slds-m-right_x-small">{section.icon}</span>
+                            {section.label}
+                        </h3>
+
+                        <!-- Table Type -->
+                        <template if:true={section.isTable}>
+                            <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_striped">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <template for:each={section.columns} for:item="column">
+                                            <th key={column} scope="col">
+                                                <div class="slds-truncate" title={column}>{column}</div>
+                                            </th>
+                                        </template>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={section.rows} for:item="row">
+                                        <tr key={row._index}>
+                                            <template for:each={row._cells} for:item="cell">
+                                                <td key={cell.column} data-label={cell.column}>
+                                                    <div class="slds-truncate" title={cell.value}>
+                                                        {cell.value}
+                                                    </div>
+                                                </td>
+                                            </template>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </template>
+
+                        <!-- List Type -->
+                        <template if:true={section.isList}>
+                            <ul class="slds-list_dotted slds-m-left_medium">
+                                <template for:each={section.value} for:item="item">
+                                    <li key={item}>{item}</li>
+                                </template>
+                            </ul>
+                        </template>
+
+                        <!-- Text Type -->
+                        <template if:true={section.isText}>
+                            <div class="slds-text-body_regular slds-p-left_small slds-p-vertical_x-small">
+                                {section.value}
+                            </div>
+                        </template>
+
+                        <!-- Object Type (nested) - render as JSON string for now -->
+                        <template if:true={section.isObject}>
+                            <div class="slds-box slds-theme_shade slds-m-left_small">
+                                <pre class="slds-text-body_small">{section.valueString}</pre>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Record Link -->
+                <template if:true={recordId}>
+                    <div class="slds-box slds-theme_info slds-m-top_medium">
+                        <div class="slds-media">
+                            <div class="slds-media__figure">
+                                <lightning-icon icon-name="utility:link" size="small"></lightning-icon>
+                            </div>
+                            <div class="slds-media__body">
+                                <p class="slds-text-heading_small">View Complete Record</p>
+                                <p>
+                                    <a href={recordUrl} target="_blank">Open Meeting Note</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <template if:false={hasData}>
+                <div class="slds-text-align_center slds-p-around_large">
+                    <lightning-icon icon-name="utility:info" size="small" class="slds-m-bottom_small"></lightning-icon>
+                    <p>No meeting data available to display.</p>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>
+

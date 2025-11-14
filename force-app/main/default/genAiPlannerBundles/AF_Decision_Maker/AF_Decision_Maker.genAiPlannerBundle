@@ -4,15 +4,23 @@
   - Captures meeting notes in natural language
   - Extracts decisions without structured forms
   - Validates records against discussed decisions
-  - Provides intelligent recommendations</description>
+  - Provides intelligent recommendations
+  - Queries and manages all Salesforce data through Data Cloud
+  - Respects user permissions with Einstein Trust Layer security</description>
     <localActionLinks>
         <genAiFunctionName>AnswerQuestionsWithKnowledge_16jKB000000L7Mn</genAiFunctionName>
+    </localActionLinks>
+    <localActionLinks>
+        <genAiFunctionName>SearchRecords_16jKB000000L7Mn</genAiFunctionName>
     </localActionLinks>
     <localTopicLinks>
         <genAiPluginName>GeneralFAQ_16jKB000000L7Mn</genAiPluginName>
     </localTopicLinks>
     <localTopicLinks>
         <genAiPluginName>Meeting_Notes_Processing_16jKB000000L7Mn</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>Data_Operations_16jKB000000L7Mn</genAiPluginName>
     </localTopicLinks>
     <localTopics>
         <fullName>GeneralFAQ_16jKB000000L7Mn</fullName>
@@ -199,10 +207,151 @@ After showing results, wait for user input:
         <pluginType>Topic</pluginType>
         <scope>My job is to assist in processing meeting notes by summarizing key points, organizing content, or extracting specific details as requested. I will not address topics or tasks unrelated to meeting notes.</scope>
     </localTopics>
+    <localTopics>
+        <fullName>Data_Operations_16jKB000000L7Mn</fullName>
+        <canEscalate>false</canEscalate>
+        <description>WHAT THIS TOPIC DOES:
+- Query any Salesforce object (Accounts, Contacts, Opportunities, Cases, Custom Objects, etc.)
+- Read record details and relationships
+- Update existing records
+- Create new records
+- Search across multiple objects
+- Perform aggregations and analytics
+
+WHAT THIS TOPIC DOES NOT DO:
+- Delete records (requires explicit permission)
+- Bypass security rules
+- Access data the user doesn&apos;t have permission to see</description>
+        <developerName>Data_Operations_16jKB000000L7Mn</developerName>
+        <genAiPluginInstructions>
+            <description>DATA CLOUD QUERY CAPABILITIES:
+
+You have access to query ALL Salesforce data through Data Cloud with Einstein Trust Layer security.
+
+IMPORTANT PRINCIPLES:
+1. All queries respect user permissions automatically
+2. Users can only see data they have access to
+3. Field-level security is enforced
+4. Sharing rules are applied automatically
+5. Always confirm before making updates
+
+QUERY EXAMPLES:
+
+User: &quot;Show me all accounts in California&quot;
+→ Query Accounts with BillingState = California
+
+User: &quot;What are the open opportunities over $100K?&quot;
+→ Query Opportunities with Amount &gt; 100000 AND IsClosed = false
+
+User: &quot;Find contacts named John Smith&quot;
+→ Query Contacts with Name containing John Smith
+
+User: &quot;Show me Sarah&apos;s cases from this week&quot;
+→ Query Cases owned by Sarah created in last 7 days
+
+User: &quot;What&apos;s the total pipeline for Q4?&quot;
+→ Aggregate Opportunities by CloseDate in Q4
+
+CROSS-OBJECT QUERIES:
+
+User: &quot;Show accounts with open cases&quot;
+→ Query Accounts that have related Cases where Status != Closed
+
+User: &quot;Find opportunities with tasks due today&quot;
+→ Query Opportunities with related Tasks where ActivityDate = TODAY
+
+UPDATE EXAMPLES:
+
+User: &quot;Change opportunity ABC stage to Closed Won&quot;
+→ Confirm: &quot;Update Opportunity ABC-123 to Closed Won stage?&quot;
+→ Execute update after confirmation
+
+User: &quot;Update the account phone number to 555-1234&quot;
+→ Confirm: &quot;Which account would you like to update?&quot;
+→ After clarification, confirm and update
+
+CREATE EXAMPLES:
+
+User: &quot;Create a new contact for John Doe at Acme Corp&quot;
+→ Confirm: &quot;Create Contact: John Doe, Account: Acme Corp?&quot;
+→ Execute creation after confirmation
+
+RESPONSE FORMATTING:
+
+1. For queries returning multiple records:
+   • Format as a numbered list or table
+   • Show key fields (Name, Amount, Status, etc.)
+   • Limit to top 10-20 results unless user asks for more
+   • Mention total count if higher
+
+2. For single record queries:
+   • Show relevant fields clearly
+   • Include related records if relevant
+   • Provide record URL for navigation
+
+3. For updates/creates:
+   • Confirm action before executing
+   • Show what will change
+   • Provide success message with record link after completion
+
+4. For errors:
+   • Explain clearly what went wrong
+   • Suggest alternatives if permission denied
+   • Ask clarifying questions if query is ambiguous
+
+HANDLING AMBIGUITY:
+
+If query is unclear:
+✓ Ask: &quot;Which specific object would you like to query?&quot;
+✓ Ask: &quot;What date range should I search?&quot;
+✓ Ask: &quot;Should I include closed records?&quot;
+
+If multiple matches:
+✓ Show top results
+✓ Ask: &quot;Which one would you like to see details for?&quot;
+
+SECURITY REMINDERS:
+
+• Never attempt to bypass security
+• If user lacks permission, explain clearly
+• Don&apos;t show data user isn&apos;t allowed to see
+• PII fields are automatically masked if no access
+
+TONE:
+• Professional and helpful
+• Conversational, not robotic
+• Provide context with results
+• Offer follow-up suggestions</description>
+            <developerName>data_operations_instructions</developerName>
+            <language>en_US</language>
+            <masterLabel>Data Operations Instructions</masterLabel>
+            <sortOrder>0</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>SearchRecords_179KB000000DjEC</functionName>
+        </localActionLinks>
+        <localActions>
+            <fullName>SearchRecords_179KB000000DjEC</fullName>
+            <description>Search and query Salesforce records using natural language. Works with all standard and custom objects including Accounts, Contacts, Opportunities, Cases, Leads, and more.</description>
+            <developerName>SearchRecords_179KB000000DjEC</developerName>
+            <invocationTarget>einsteinSearch</invocationTarget>
+            <invocationTargetType>standardInvocableAction</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+            <localDeveloperName>SearchRecords</localDeveloperName>
+            <masterLabel>Search Records</masterLabel>
+            <progressIndicatorMessage>Searching Salesforce data...</progressIndicatorMessage>
+        </localActions>
+        <localDeveloperName>Data_Operations</localDeveloperName>
+        <masterLabel>Data Operations</masterLabel>
+        <pluginType>Topic</pluginType>
+        <scope>My job is to help users query, read, update, and create Salesforce records across all objects they have access to. I use Data Cloud with Einstein Trust Layer to ensure secure, permission-aware data access. I can search any standard or custom object, perform analytics, and help with data management tasks.</scope>
+    </localTopics>
     <masterLabel>AF_Decision_Maker</masterLabel>
     <plannerActions>
         <fullName>AnswerQuestionsWithKnowledge_16jKB000000L7Mn</fullName>
-        <description>Answers questions about company policies and procedures, troubleshooting steps, or product information. For example: “What is your return policy?” “How do I fix an issue?” or “What features does a product have?”</description>
+        <description>Answers questions about company policies and procedures, troubleshooting steps, or product information. For example: "What is your return policy?" "How do I fix an issue?" or "What features does a product have?"</description>
         <developerName>AnswerQuestionsWithKnowledge_16jKB000000L7Mn</developerName>
         <invocationTarget>streamKnowledgeSearch</invocationTarget>
         <invocationTargetType>standardInvocableAction</invocationTargetType>
@@ -212,6 +361,18 @@ After showing results, wait for user input:
         <masterLabel>Answer Questions with Knowledge</masterLabel>
         <progressIndicatorMessage>Getting answers</progressIndicatorMessage>
         <source>EmployeeCopilot__AnswerQuestionsWithKnowledge</source>
+    </plannerActions>
+    <plannerActions>
+        <fullName>SearchRecords_16jKB000000L7Mn</fullName>
+        <description>Search and query Salesforce records using natural language. Works with all standard and custom objects including Accounts, Contacts, Opportunities, Cases, Leads, and more. Powered by Data Cloud with Einstein Trust Layer for secure, permission-aware access.</description>
+        <developerName>SearchRecords_16jKB000000L7Mn</developerName>
+        <invocationTarget>einsteinSearch</invocationTarget>
+        <invocationTargetType>standardInvocableAction</invocationTargetType>
+        <isConfirmationRequired>false</isConfirmationRequired>
+        <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+        <localDeveloperName>SearchRecords</localDeveloperName>
+        <masterLabel>Search Records</masterLabel>
+        <progressIndicatorMessage>Searching Salesforce data...</progressIndicatorMessage>
     </plannerActions>
     <plannerSurfaces>
         <adaptiveResponseAllowed>true</adaptiveResponseAllowed>
